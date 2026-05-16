@@ -620,7 +620,10 @@ window._saveEmployeesFS=async function(employees){
   const uid=window._currentUser.id;
   await _sb.from('employees').delete().eq('user_id',uid);
   if(employees.length){
-    await _sb.from('employees').insert(employees.map(e=>({user_id:uid,name:e.name,email:e.email})));
+    const {error}=await _sb.from('employees').insert(
+      employees.map(e=>({user_id:uid,name:e.name,email:e.email}))
+    );
+    if(error)console.error('Employee save error:',error);
   }
 };
 
