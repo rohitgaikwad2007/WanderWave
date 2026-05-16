@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>WanderWave — Corporate Trip Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+/* ===== AUTH PAGE ===== */
+#auth-page {
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#0b1022 0%,#1a1040 50%,#0b1a30 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Outfit',sans-serif;
+}
+#auth-page.hidden{display:none;}
+.auth-card {
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:24px;
+  padding:2.5rem 2rem;
+  width:100%;max-width:420px;
+  backdrop-filter:blur(20px);
+  box-shadow:0 32px 80px rgba(0,0,0,0.5);
+}
+.auth-logo {
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.9rem;font-weight:700;
+  background:linear-gradient(90deg,#c8973a,#e8c98a);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  text-align:center;margin-bottom:0.2rem;
+}
+.auth-tagline{text-align:center;color:rgba(255,255,255,0.45);font-size:0.82rem;margin-bottom:2rem;}
+.auth-tabs{display:flex;gap:0.5rem;margin-bottom:1.8rem;background:rgba(255,255,255,0.05);border-radius:12px;padding:4px;}
+.auth-tab{flex:1;padding:0.55rem;border:none;border-radius:9px;background:transparent;color:rgba(255,255,255,0.5);font-family:'Outfit',sans-serif;font-size:0.9rem;cursor:pointer;transition:all 0.2s;}
+.auth-tab.active{background:rgba(255,255,255,0.12);color:#fff;font-weight:600;}
+.auth-field{margin-bottom:1rem;}
+.auth-field label{display:block;font-size:0.78rem;color:rgba(255,255,255,0.55);margin-bottom:0.4rem;letter-spacing:0.03em;}
+.auth-field input{width:100%;padding:0.7rem 1rem;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.92rem;outline:none;transition:border 0.2s;}
+.auth-field input:focus{border-color:rgba(200,151,58,0.6);background:rgba(255,255,255,0.1);}
+.auth-field input::placeholder{color:rgba(255,255,255,0.25);}
+.auth-btn{width:100%;padding:0.85rem;background:linear-gradient(135deg,#4338ca,#7c3aed);border:none;border-radius:12px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;margin-top:0.5rem;transition:opacity 0.2s;letter-spacing:0.02em;}
+.auth-btn:hover{opacity:0.9;}
+.auth-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.auth-err{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:0.6rem 0.8rem;font-size:0.82rem;color:#fca5a5;margin-bottom:1rem;display:none;}
+.auth-err.show{display:block;}
+.auth-divider{text-align:center;color:rgba(255,255,255,0.2);font-size:0.75rem;margin:1rem 0;position:relative;}
+.auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:rgba(255,255,255,0.1);}
+.auth-divider::before{left:0;}.auth-divider::after{right:0;}
+.auth-google-btn{width:100%;padding:0.75rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);border-radius:12px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:0.6rem;transition:background 0.2s;}
+.auth-google-btn:hover{background:rgba(255,255,255,0.14);}
+.auth-bg-blobs{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+.auth-blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.18;}
+.auth-blob1{width:400px;height:400px;background:#4338ca;top:-100px;right:-100px;}
+.auth-blob2{width:350px;height:350px;background:#c8973a;bottom:-80px;left:-80px;}
+.auth-card{position:relative;z-index:1;}
+
+/* Navbar user chip */
+.nav-user-chip{display:flex;align-items:center;gap:0.5rem;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:999px;padding:0.3rem 0.8rem 0.3rem 0.3rem;cursor:default;}
+.nav-user-ava{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#4338ca,#c8973a);display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;}
+.nav-user-name{font-size:0.8rem;color:rgba(255,255,255,0.8);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nav-logout-btn{background:none;border:none;color:rgba(255,255,255,0.45);font-size:0.75rem;cursor:pointer;padding:0 0.2rem;transition:color 0.2s;}
+.nav-logout-btn:hover{color:#ef4444;}
+</style>
+</head>
+<body>
+
+<!-- AUTH PAGE -->
+<div id="auth-page">
+  <div class="auth-bg-blobs">
+    <div class="auth-blob auth-blob1"></div>
+    <div class="auth-blob auth-blob2"></div>
+  </div>
+  <div class="auth-card">
+    <div class="auth-logo">WanderWave</div>
+    <div class="auth-tagline">Corporate Trip Planner — Sign in to continue</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
+    </div>
+    <div class="auth-err" id="auth-err"></div>
+
+    <!-- Login Form -->
+    <div id="auth-login-form">
+      <div class="auth-field"><label>Email</label><input type="email" id="login-email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="login-pass" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">Sign In →</button>
+      <div class="auth-divider">or</div>
+      <button class="auth-google-btn" onclick="doGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.8 2.4 30.3 0 24 0 14.7 0 6.8 5.4 2.8 13.3l7.8 6C12.5 13.2 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.2-.4-4.7H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8C43.5 37.5 46.5 31.4 46.5 24.5z"/><path fill="#FBBC05" d="M10.6 28.7A14.8 14.8 0 019.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A23.9 23.9 0 000 24c0 3.9.9 7.5 2.5 10.7l8.1-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.2 1.5-5 2.3-8.4 2.3-6.2 0-11.5-3.7-13.4-9l-8.1 6C6.8 42.6 14.7 48 24 48z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="auth-signup-form" style="display:none">
+      <div class="auth-field"><label>Full Name</label><input type="text" id="signup-name" placeholder="Jane Smith"/></div>
+      <div class="auth-field"><label>Email</label><input type="email" id="signup-email" placeholder="you@company.com"/></div>
+      <div class="auth-field"><label>Password</label><input type="password" id="signup-pass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doSignup()"/></div>
+      <button class="auth-btn" id="signup-btn" onclick="doSignup()">Create Account →</button>
+      <div class="auth-divider">or</div>
+      <button class="auth-google-btn" onclick="doGoogleLogin()">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.2l6.7-6.7C35.8 2.4 30.3 0 24 0 14.7 0 6.8 5.4 2.8 13.3l7.8 6C12.5 13.2 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.2-.4-4.7H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8C43.5 37.5 46.5 31.4 46.5 24.5z"/><path fill="#FBBC05" d="M10.6 28.7A14.8 14.8 0 019.5 24c0-1.6.3-3.2.8-4.7l-7.8-6A23.9 23.9 0 000 24c0 3.9.9 7.5 2.5 10.7l8.1-6z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.2 1.5-5 2.3-8.4 2.3-6.2 0-11.5-3.7-13.4-9l-8.1 6C6.8 42.6 14.7 48 24 48z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADER OVERLAY -->
+<div id="loader" class="loader-overlay">
+  <div class="loader-inner">
+    <div class="loader-wordmark">WanderWave</div>
+    <div class="loader-divider"></div>
+    <div class="loader-track"><div class="loader-trail"></div></div>
+    <div class="loader-msg" id="loader-msg">Initialising</div>
+    <div class="loader-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="nav" id="nav">
+  <div class="nav-logo" onclick="showPage('home')">WanderWave</div>
+  <div class="nav-pills">
+    <button class="npill active" id="np-home" onclick="showPage('home')">Home</button>
+    <button class="npill" id="np-explore" onclick="showPage('explore')">Explore</button>
+    <button class="npill" id="np-planner" onclick="showPage('planner')">Plan Trip</button>
+    <button class="npill" id="np-profile" onclick="showPage('profile')">Profile</button>
+    <button class="npill" id="np-myplans" onclick="showPage('myplans')">My Plans</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:0.75rem">
+    <div class="nav-user-chip" id="nav-user-chip" style="display:none">
+      <div class="nav-user-ava" id="nav-user-ava">?</div>
+      <span class="nav-user-name" id="nav-user-name">User</span>
+      <button class="nav-logout-btn" onclick="doLogout()" title="Sign out">⎋</button>
+    </div>
+    <button class="nav-start" onclick="showPage('planner')">Start Planning</button>
+  </div>
+</nav>
+
+<!-- ======= HOME ======= -->
+<div id="page-home" class="page active">
+  <div class="hero-wrap">
+    <div class="hero-grid-bg"></div>
+    <div class="hero-blob blob1"></div>
+    <div class="hero-blob blob2"></div>
+    <div class="hero-blob blob3"></div>
+    <div class="hero-particles" id="hero-particles"></div>
+    <div class="hero-content">
+      <div class="hero-chip">Corporate Travel — Reimagined</div>
+      <h1 class="hero-h1">Plan your team's<br/><span class="hero-highlight">dream trip</span><br/>in minutes.</h1>
+      <p class="hero-p">From beaches to mountains — pick a destination, plan each day, and send the itinerary to your whole team instantly.</p>
+      <div class="hero-actions">
+        <button class="btn-pop" onclick="showPage('planner')">Start Planning</button>
+        <button class="btn-soft" onclick="showPage('explore')">Browse Destinations</button>
+      </div>
+      <div class="hero-badges">
+        <span class="hbadge">12 Destinations</span>
+        <span class="hbadge">Up to 14 Days</span>
+        <span class="hbadge">Instant Email</span>
+        <span class="hbadge">Visual Journey Map</span>
+      </div>
+    </div>
+    <div class="hero-cards-float">
+      <div class="float-card fc1">🏖️<br/><strong>Goa</strong><small>Beach vibes</small></div>
+      <div class="float-card fc2">🏔️<br/><strong>Shimla</strong><small>Mountain cool</small></div>
+      <div class="float-card fc3">🕌<br/><strong>Agra</strong><small>Heritage walk</small></div>
+      <div class="float-card fc4">🌿<br/><strong>Munnar</strong><small>Tea trails</small></div>
+    </div>
+  </div>
+
+  <div class="home-steps-section">
+    <div class="section-eyebrow">How it works</div>
+    <h2 class="section-h2">Plan a perfect trip in <span class="txt-pop">five steps</span></h2>
+    <div class="steps-row">
+      <div class="step-bubble" style="--c:#4338ca">
+        <div class="sb-icon">🗺️</div>
+        <div class="sb-num">1</div>
+        <h4>Pick Destination</h4>
+        <p>Choose from 12 amazing Indian cities</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-bubble" style="--c:#c8973a">
+        <div class="sb-icon">✈️</div>
+        <div class="sb-num">2</div>
+        <h4>Choose Route</h4>
+        <p>Flight, train, bus or cab</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-bubble" style="--c:#0c8c7a">
+        <div class="sb-icon">📅</div>
+        <div class="sb-num">3</div>
+        <h4>Set Duration</h4>
+        <p>1 to 14 days, your call</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-bubble" style="--c:#2563eb">
+        <div class="sb-icon">🏨</div>
+        <div class="sb-num">4</div>
+        <h4>Plan Each Day</h4>
+        <p>Stay, activities & food menus</p>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="step-bubble" style="--c:#7c3aed">
+        <div class="sb-icon">🚀</div>
+        <div class="sb-num">5</div>
+        <h4>Send to Team</h4>
+        <p>Email the whole crew instantly</p>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:2.5rem">
+      <button class="btn-pop" onclick="showPage('planner')">Start Planning Now</button>
+    </div>
+  </div>
+
+  <div class="home-dest-section">
+    <div class="section-eyebrow">Top Picks</div>
+    <h2 class="section-h2">Featured <span class="txt-pop">destinations</span></h2>
+    <div class="home-dest-grid" id="home-dest-grid"></div>
+  </div>
+</div>
+
+<!-- ======= EXPLORE ======= -->
+<div id="page-explore" class="page">
+  <div class="page-top-banner" style="--bg:linear-gradient(135deg,#0f1628,#1e2d5e)">
+    <div class="ptb-content">
+      <div class="section-eyebrow" style="color:rgba(255,255,255,0.6)">Discover India</div>
+      <h1 class="ptb-title">All Destinations</h1>
+      <p>12 extraordinary places for your corporate adventures</p>
+    </div>
+    <div class="ptb-emoji">🗺️</div>
+  </div>
+  <div class="explore-body">
+    <div class="filter-chips" id="filter-chips">
+      <button class="fchip active" onclick="filterDest('all',this)">All</button>
+      <button class="fchip" onclick="filterDest('beach',this)">Beach 🏖️</button>
+      <button class="fchip" onclick="filterDest('hill',this)">Hills 🏔️</button>
+      <button class="fchip" onclick="filterDest('heritage',this)">Heritage 🏯</button>
+      <button class="fchip" onclick="filterDest('nature',this)">Nature 🌿</button>
+      <button class="fchip" onclick="filterDest('spiritual',this)">Spiritual 🕉️</button>
+    </div>
+    <div class="explore-cards" id="explore-cards"></div>
+  </div>
+</div>
+
+<!-- ======= PLANNER ======= -->
+<div id="page-planner" class="page">
+  <div class="planner-progress" id="planner-progress">
+    <div class="pp-wrap">
+      <div class="pp-steps" id="pp-steps"></div>
+      <div class="pp-bar"><div class="pp-fill" id="pp-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- Step 1: Destination -->
+  <div id="step-1" class="pstep active">
+    <div class="step-top" style="--accent:#4338ca">
+      <div class="st-emoji">🗺️</div>
+      <h2 class="st-title">Where are we going?</h2>
+      <p class="st-sub">Select a destination to begin your journey</p>
+    </div>
+    <div class="dest-grid" id="dest-grid"></div>
+  </div>
+
+  <!-- Step 2: Route -->
+  <div id="step-2" class="pstep">
+    <div class="step-top" style="--accent:#c8973a">
+      <div class="st-emoji">✈️</div>
+      <h2 class="st-title">How will you travel?</h2>
+      <p class="st-sub">Choose how your team gets there</p>
+    </div>
+    <div class="route-big-grid" id="route-big-grid"></div>
+    <div id="route-detail" class="route-detail"></div>
+    <div class="step-foot"><button class="btn-back" onclick="goStep(1)">← Back</button></div>
+  </div>
+
+  <!-- Step 3: Duration -->
+  <div id="step-3" class="pstep">
+    <div class="step-top" style="--accent:#0c8c7a">
+      <div class="st-emoji">📅</div>
+      <h2 class="st-title">How long is the trip?</h2>
+      <p class="st-sub">Set the number of days and your start date</p>
+    </div>
+    <div class="dur-layout">
+      <div class="dur-box">
+        <div class="dur-label">Trip Length</div>
+        <div class="dur-counter">
+          <button class="dur-btn" onclick="chDays(-1)">−</button>
+          <div class="dur-bubble"><span id="days-n">3</span><small>days</small></div>
+          <button class="dur-btn" onclick="chDays(1)">+</button>
+        </div>
+        <div class="dur-slider-wrap"><input type="range" min="1" max="14" value="3" id="days-slider" oninput="sliderDays(this.value)" class="dur-slider"/></div>
+        <div class="dur-presets">
+          <button class="dpreset" onclick="setDays(2)">Weekend</button>
+          <button class="dpreset" onclick="setDays(4)">Quick Trip</button>
+          <button class="dpreset" onclick="setDays(7)">Full Week</button>
+          <button class="dpreset" onclick="setDays(10)">Extended</button>
+        </div>
+      </div>
+      <div class="dur-box">
+        <div class="dur-label">Start Date</div>
+        <input type="date" id="start-date" class="date-input" onchange="S.startDate=this.value"/>
+        <div class="dur-label" style="margin-top:1.5rem">Team Size</div>
+        <div class="dur-counter">
+          <button class="dur-btn" onclick="chTeam(-1)">−</button>
+          <div class="dur-bubble"><span id="team-n">10</span><small>people</small></div>
+          <button class="dur-btn" onclick="chTeam(1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="step-foot">
+      <button class="btn-back" onclick="goStep(2)">← Back</button>
+      <button class="btn-next" onclick="goStep(4)">Plan Each Day →</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Day Planner -->
+  <div id="step-4" class="pstep">
+    <div class="step-top" style="--accent:#2563eb">
+      <div class="st-emoji">📋</div>
+      <h2 class="st-title">Plan each day</h2>
+      <p class="st-sub">Set stay, activities and food for each day</p>
+    </div>
+    <div class="day-tabs-wrap">
+      <div class="day-tabs" id="day-tabs"></div>
+    </div>
+    <div id="day-editor" class="day-editor"></div>
+    <div class="step-foot">
+      <button class="btn-back" onclick="goStep(3)">← Back</button>
+      <button class="btn-next" onclick="goStep(5)">Review & Send →</button>
+    </div>
+  </div>
+
+  <!-- Step 5: Review & Send -->
+  <div id="step-5" class="pstep">
+    <div class="step-top" style="--accent:#7c3aed">
+      <div class="st-emoji">🚀</div>
+      <h2 class="st-title">Review &amp; Share</h2>
+      <p class="st-sub">Your complete trip plan — ready to send</p>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-card" id="summary-card"></div>
+
+    <!-- JOURNEY MAP -->
+    <div class="journey-map-card" id="journey-map-card"></div>
+
+    <!-- DAY CARDS -->
+    <div id="review-days"></div>
+
+    <!-- UPDATE SECTION -->
+    <div class="update-section">
+      <h3>🔄 Update Plan</h3>
+      <p>Changed something? Re-save with latest details.</p>
+      <button class="btn-pop small" onclick="updateSavedPlan()">Update Saved Plan</button>
+      <div id="update-status" class="update-status"></div>
+    </div>
+
+    <!-- SAVE PLAN -->
+    <div class="save-plan-box">
+      <div class="spb-left">
+        <div class="spb-icon">💾</div>
+        <div>
+          <h3>Save to My Plans</h3>
+          <p>Save this trip plan so you can revisit it anytime under <strong>My Plans</strong></p>
+        </div>
+      </div>
+      <button class="btn-save-plan" id="save-plan-btn" onclick="savePlan()">💾 Save Plan</button>
+      <div id="save-plan-status" class="save-plan-status"></div>
+    </div>
+
+    <!-- SEND PANEL -->
+    <div class="send-panel">
+      <div class="sp-head">
+        <div class="sp-icon">🚀</div>
+        <div><h3>Share Plan with Team</h3><p>Send your day-by-day plan to team members via email</p></div>
+      </div>
+
+      <div class="ejs-recipient-section">
+        <div class="ejs-rec-label">Add Recipients</div>
+        <div class="email-add-row">
+          <input type="email" id="new-email" placeholder="teammate@company.com" class="email-input" onkeydown="if(event.key==='Enter')addEmail()"/>
+          <button class="btn-add-email" onclick="addEmail()">+ Add</button>
+        </div>
+        <div id="email-pills" class="email-pills"></div>
+        <div class="ejs-rec-note">Employees added in your Profile are automatically included.</div>
+      </div>
+
+      <button class="btn-send-big" id="send-btn" onclick="sendEmails()">
+        <span id="send-lbl">📧 Send Plan via Email</span>
+      </button>
+      <div id="send-status" class="send-status"></div>
+    </div>
+
+    <!-- PAYMENT SECTION -->
+    <div class="payment-section" id="payment-section">
+      <div class="pmt-header">
+        <div class="pmt-header-left">
+          <div class="pmt-icon">💳</div>
+          <div>
+            <h3>Trip Payment</h3>
+            <p>Auto-calculated cost breakdown &amp; UPI payment</p>
+          </div>
+        </div>
+        <div class="pmt-secure-badge">🔒 Secure UPI</div>
+      </div>
+
+      <div class="pmt-breakdown" id="pmt-breakdown"></div>
+
+      <div class="pmt-total-row">
+        <div class="pmt-total-label">Total Trip Cost (Estimated)</div>
+        <div class="pmt-total-amount" id="pmt-total">₹0</div>
+      </div>
+      <div class="pmt-perperson" id="pmt-perperson"></div>
+
+      <div class="pmt-upi-box">
+        <div class="pmt-upi-left">
+          <div class="pmt-upi-title">Pay via UPI</div>
+          <div class="pmt-upi-id">
+            <span class="pmt-upi-label">UPI ID</span>
+            <span class="pmt-upi-val">9579114962@ibl</span>
+            <button class="pmt-copy-btn" onclick="copyUPI()">📋 Copy</button>
+          </div>
+          <div class="pmt-upi-name">WanderWave Trips · IBL Bank</div>
+          <div class="pmt-upi-apps">
+            <button class="pmt-app-btn" onclick="payWithApp('gpay')">🟢 GPay</button>
+            <button class="pmt-app-btn" onclick="payWithApp('phonepe')">🟣 PhonePe</button>
+            <button class="pmt-app-btn" onclick="payWithApp('paytm')">🔵 Paytm</button>
+            <button class="pmt-app-btn" onclick="payWithApp('bhim')">🟠 BHIM</button>
+            <button class="pmt-app-btn" onclick="payWithApp('upi')">🏦 Any UPI</button>
+          </div>
+        </div>
+        <div class="pmt-qr-wrap">
+          <div class="pmt-qr-label">Scan to Pay</div>
+          <canvas id="pmt-qr-canvas" width="160" height="160"></canvas>
+          <div class="pmt-qr-sub" id="pmt-qr-sub">Generating QR…</div>
+        </div>
+      </div>
+
+      <div class="pmt-status-row">
+        <div class="pmt-status-block">
+          <span class="pmt-dot" id="pmt-dot"></span>
+          <span id="pmt-status-text">Awaiting payment</span>
+        </div>
+        <div class="pmt-status-actions">
+          <button class="pmt-mark-btn" onclick="markPaid()">✓ Mark as Paid</button>
+          <button class="pmt-split-btn" onclick="showSplitModal()">⚡ Split Among Team</button>
+        </div>
+      </div>
+
+      <div id="pmt-history-wrap" style="display:none">
+        <div class="pmt-history-title">💰 Payment Log</div>
+        <div id="pmt-history-list"></div>
+      </div>
+    </div>
+
+    <!-- Split Modal -->
+    <div id="split-modal" class="split-overlay" style="display:none" onclick="if(event.target===this)closeSplitModal()">
+      <div class="split-box">
+        <div class="split-head">
+          <h3>⚡ Split Among Team</h3>
+          <button onclick="closeSplitModal()">✕</button>
+        </div>
+        <div id="split-body"></div>
+      </div>
+    </div>
+
+    <div class="step-foot"><button class="btn-back" onclick="goStep(4)">← Back to Days</button></div>
+  </div>
+</div>
+
+<!-- ======= PROFILE ======= -->
+<div id="page-profile" class="page">
+  <div class="page-top-banner" style="--bg:linear-gradient(135deg,#1a0a2e,#2d1254)">
+    <div class="ptb-content">
+      <div class="section-eyebrow" style="color:rgba(255,255,255,0.6)">Company</div>
+      <h1 class="ptb-title">Your Profile</h1>
+      <p>Company details and employee roster</p>
+    </div>
+    <div class="ptb-emoji">👥</div>
+  </div>
+  <div class="profile-body">
+    <div class="pcard">
+      <div class="pcard-head">
+        <div class="co-ava" id="co-ava">TC</div>
+        <div class="pstats">
+          <div class="pstat"><div class="pstat-n" id="ps-emp">0</div><div class="pstat-l">Employees</div></div>
+          <div class="pstat"><div class="pstat-n" id="ps-plans">0</div><div class="pstat-l">Plans Sent</div></div>
+        </div>
+      </div>
+      <h3 class="pcard-h">Organisation Details</h3>
+      <div class="pf-grid">
+        <div class="pf-group"><label>Company Name</label><input type="text" id="comp-name" placeholder="e.g. Infosys Ltd."/></div>
+        <div class="pf-group"><label>Industry</label>
+          <select id="comp-industry"><option value="">Select…</option><option>Technology</option><option>Finance</option><option>Healthcare</option><option>Manufacturing</option><option>Retail</option><option>Education</option><option>Other</option></select>
+        </div>
+        <div class="pf-group"><label>HR Email</label><input type="email" id="comp-email" placeholder="hr@company.com"/></div>
+        <div class="pf-group"><label>City</label><input type="text" id="comp-city" placeholder="Pune"/></div>
+      </div>
+      <button class="btn-pop" onclick="saveProfile()">Save Profile</button>
+    </div>
+    <div class="pcard">
+      <h3 class="pcard-h">Employee Roster</h3>
+      <p class="pcard-sub">People who will receive trip plan emails</p>
+      <div class="emp-add">
+        <input type="text" id="emp-name" placeholder="Full name"/>
+        <input type="email" id="emp-email" placeholder="email@company.com"/>
+        <button class="btn-pop small" onclick="addEmployee()">+ Add</button>
+      </div>
+      <div id="emp-list" class="emp-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= MY PLANS ======= -->
+<div id="page-myplans" class="page">
+  <div class="page-top-banner" style="--bg:linear-gradient(135deg,#0c1624,#0e2640)">
+    <div class="ptb-content">
+      <div class="section-eyebrow" style="color:rgba(255,255,255,0.6)">Archive</div>
+      <h1 class="ptb-title">My Plans</h1>
+      <p>All previously created trip plans</p>
+    </div>
+    <div class="ptb-emoji">🗂️</div>
+  </div>
+  <div class="myplans-body">
+    <div id="plans-list" class="plans-list"></div>
+  </div>
+</div>
+
+<!-- CONFETTI -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ══════════════════════════════════════════════
+//  SUPABASE CONFIG
+//  1. Go to https://supabase.com → New project
+//  2. Settings → API → copy Project URL & anon key
+//  3. Paste them below (anon key is safe for frontend)
+// ══════════════════════════════════════════════
+const SUPABASE_URL  = 'https://nswexlpvvuoitgofzszj.supabase.co';       // e.g. https://xyzabc.supabase.co
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5zd2V4bHB2dnVvaXRnb2Z6c3pqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5MDU1NzQsImV4cCI6MjA5NDQ4MTU3NH0.4iY4CSBatMZ1psGGa_udEYY6tLdpAFmThffbwCJHxe8';  // starts with "eyJ..."
+
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── helpers ──
+function showAuthErr(msg){
+  const el=document.getElementById('auth-err');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),4000);
+}
+function _setNavUser(user){
+  const chip=document.getElementById('nav-user-chip');
+  const ava=document.getElementById('nav-user-ava');
+  const nm=document.getElementById('nav-user-name');
+  if(!user){chip.style.display='none';return;}
+  chip.style.display='flex';
+  const dn=user.user_metadata?.full_name||user.email||'User';
+  ava.textContent=dn[0].toUpperCase();
+  nm.textContent=dn.split(' ')[0];
+}
+
+// ── AUTH STATE ──
+_sb.auth.onAuthStateChange(async(event,session)=>{
+  if(session?.user){
+    window._currentUser=session.user;
+    document.getElementById('auth-page').classList.add('hidden');
+    _setNavUser(session.user);
+    await _loadFromSupabase();
+  } else {
+    window._currentUser=null;
+    document.getElementById('auth-page').classList.remove('hidden');
+    _setNavUser(null);
+  }
+});
+
+// ── LOAD DATA ──
+async function _loadFromSupabase(){
+  if(!window._currentUser)return;
+  const uid=window._currentUser.id;
+  try{
+    // profile/company
+    const {data:comp}=await _sb.from('profiles').select('*').eq('user_id',uid).single();
+    if(comp){
+      S.company={name:comp.company_name||'',industry:comp.industry||'',email:comp.hr_email||'',city:comp.city||''};
+      localStorage.setItem('tm_company',JSON.stringify(S.company));
+      loadProfile();
+    }
+    // employees
+    const {data:emps}=await _sb.from('employees').select('*').eq('user_id',uid);
+    if(emps){
+      S.employees=emps.map(e=>({name:e.name,email:e.email}));
+      localStorage.setItem('tm_employees',JSON.stringify(S.employees));
+      loadEmpList();updateStats();
+    }
+    // plans
+    const {data:plans}=await _sb.from('plans').select('*').eq('user_id',uid).order('created_at',{ascending:false});
+    if(plans){
+      S.plans=plans.map(p=>JSON.parse(p.data));
+      localStorage.setItem('tm_plans',JSON.stringify(S.plans));
+      loadPlans();updateStats();
+    }
+  }catch(e){console.warn('Supabase load error:',e);}
+}
+
+// ── SAVE COMPANY ──
+window._saveCompanyFS=async function(data){
+  if(!window._currentUser)return;
+  const uid=window._currentUser.id;
+  await _sb.from('profiles').upsert({user_id:uid,company_name:data.name,industry:data.industry,hr_email:data.email,city:data.city},{onConflict:'user_id'});
+};
+
+// ── SAVE EMPLOYEES ──
+window._saveEmployeesFS=async function(employees){
+  if(!window._currentUser)return;
+  const uid=window._currentUser.id;
+  await _sb.from('employees').delete().eq('user_id',uid);
+  if(employees.length){
+    await _sb.from('employees').insert(employees.map(e=>({user_id:uid,name:e.name,email:e.email})));
+  }
+};
+
+// ── SAVE PLAN ──
+window._savePlanFS=async function(plan){
+  if(!window._currentUser)return;
+  const uid=window._currentUser.id;
+  await _sb.from('plans').upsert({user_id:uid,plan_id:String(plan.id),data:JSON.stringify(plan)},{onConflict:'plan_id'});
+};
+
+// ── DELETE PLAN ──
+window._deletePlanFS=async function(planId){
+  if(!window._currentUser)return;
+  await _sb.from('plans').delete().eq('plan_id',String(planId));
+};
+
+// ── AUTH ACTIONS ──
+window.doLogin=async function(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const btn=document.getElementById('login-btn');
+  if(!email||!pass){showAuthErr('Please fill in all fields.');return;}
+  btn.disabled=true;btn.textContent='Signing in…';
+  const {error}=await _sb.auth.signInWithPassword({email,password:pass});
+  if(error){showAuthErr(sbErrMsg(error.message));btn.disabled=false;btn.textContent='Sign In →';}
+};
+
+window.doSignup=async function(){
+  const name=document.getElementById('signup-name').value.trim();
+  const email=document.getElementById('signup-email').value.trim();
+  const pass=document.getElementById('signup-pass').value;
+  const btn=document.getElementById('signup-btn');
+  if(!name||!email||!pass){showAuthErr('Please fill in all fields.');return;}
+  if(pass.length<6){showAuthErr('Password must be at least 6 characters.');return;}
+  btn.disabled=true;btn.textContent='Creating…';
+  const {error}=await _sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+  if(error){showAuthErr(sbErrMsg(error.message));btn.disabled=false;btn.textContent='Create Account →';}
+  else{showAuthErr('✅ Check your email to confirm your account, then sign in.');btn.disabled=false;btn.textContent='Create Account →';}
+};
+
+window.doGoogleLogin=async function(){
+  const {error}=await _sb.auth.signInWithOAuth({provider:'google'});
+  if(error)showAuthErr(error.message);
+};
+
+window.doLogout=async function(){
+  await _sb.auth.signOut();
+  S.company={};S.employees=[];S.plans=[];
+  localStorage.clear();
+};
+
+function sbErrMsg(msg){
+  if(msg.includes('Invalid login'))return 'Invalid email or password.';
+  if(msg.includes('already registered'))return 'An account with this email already exists.';
+  if(msg.includes('Password'))return 'Password must be at least 6 characters.';
+  return msg||'Authentication failed. Please try again.';
+}
+</script>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
