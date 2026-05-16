@@ -609,9 +609,18 @@ async function _loadFromSupabase(){
 
 // ── SAVE COMPANY ──
 window._saveCompanyFS=async function(data){
-  if(!window._currentUser)return;
+  if(!window._currentUser){console.warn('No user logged in');return;}
   const uid=window._currentUser.id;
-  await _sb.from('profiles').upsert({user_id:uid,company_name:data.name,industry:data.industry,hr_email:data.email,city:data.city},{onConflict:'user_id'});
+  console.log('Saving profile for user:',uid,'data:',data);
+  const {data:result,error}=await _sb.from('profiles').upsert(
+    {user_id:uid,company_name:data.name,industry:data.industry,hr_email:data.email,city:data.city},
+    {onConflict:'user_id'}
+  );
+  if(error){
+    console.error('Profile save FAILED:',error);
+  } else {
+    console.log('Profile saved OK:',result);
+  }
 };
 
 // ── SAVE EMPLOYEES ──
