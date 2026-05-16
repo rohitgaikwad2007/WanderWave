@@ -646,9 +646,15 @@ window._saveEmployeesFS=async function(employees){
 
 // ── SAVE PLAN ──
 window._savePlanFS=async function(plan){
-  if(!window._currentUser)return;
+  if(!window._currentUser){console.warn('No user for plan save');return;}
   const uid=window._currentUser.id;
-  await _sb.from('plans').upsert({user_id:uid,plan_id:String(plan.id),data:JSON.stringify(plan)},{onConflict:'plan_id'});
+  console.log('Saving plan:',plan.id,'for user:',uid);
+  const {data,error}=await _sb.from('plans').upsert(
+    {user_id:uid,plan_id:String(plan.id),data:JSON.stringify(plan)},
+    {onConflict:'plan_id'}
+  );
+  if(error)console.error('Plan save FAILED:',error);
+  else console.log('Plan saved OK');
 };
 
 // ── DELETE PLAN ──
