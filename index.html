@@ -618,12 +618,20 @@ window._saveCompanyFS=async function(data){
 window._saveEmployeesFS=async function(employees){
   if(!window._currentUser)return;
   const uid=window._currentUser.id;
-  await _sb.from('employees').delete().eq('user_id',uid);
+  
+  // Delete existing employees first, wait for it to complete
+  const {error:delErr}=await _sb.from('employees').delete().eq('user_id',uid);
+  if(delErr){console.error('Delete error:',delErr);return;}
+  
+  // Small delay to ensure delete completes before insert
+  await new Promise(r=>setTimeout(r,300));
+  
+  // Insert all employees at once
   if(employees.length){
-    const {error}=await _sb.from('employees').insert(
+    const {error:insErr}=await _sb.from('employees').insert(
       employees.map(e=>({user_id:uid,name:e.name,email:e.email}))
     );
-    if(error)console.error('Employee save error:',error);
+    if(insErr)console.error('Insert error:',insErr);
   }
 };
 
